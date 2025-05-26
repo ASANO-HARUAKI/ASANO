@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>クラス別シフト検索</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 2rem;
+      width: 100%;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>クラス別シフト検索</h1>
+
+  <label for="grade">学年：</label>
+  <select id="grade">
+    <option value="中1">中1</option>
+    <option value="中2">中2</option>
+    <option value="中3">中3</option>
+    <option value="高1">高1</option>
+    <option value="高2">高2</option>
+    <option value="高3">高3</option>
+  </select>
+
+  <label for="class">クラス：</label>
+  <select id="class">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+  </select>
+
+  <button onclick="searchShift()">検索</button>
+
+  <div id="result"></div>
+
+  <script>
+    const shiftData = {};
+
+    async function loadData() {
+      const res = await fetch("shift_data.json");
+      const data = await res.json();
+      Object.assign(shiftData, data);
+    }
+
+    function searchShift() {
+      const grade = document.getElementById("grade").value;
+      const cls = document.getElementById("class").value;
+      const key = `${grade}-${cls}`;
+      const data = shiftData[key];
+      const resultDiv = document.getElementById("result");
+
+      if (!data) {
+        resultDiv.innerHTML = "<p>データが見つかりません。</p>";
+        return;
+      }
+
+      let html = "<h2>1日目</h2>" + createTable(data.day1);
+      html += "<h2>2日目</h2>" + createTable(data.day2);
+      resultDiv.innerHTML = html;
+    }
+
+    function createTable(shift) {
+      let html = "<table><tr><th>時間</th>";
+      const timeSlots = Object.keys(shift);
+      timeSlots.forEach(t => {
+        html += `<th>${t}</th>`;
+      });
+      html += "</tr><tr><td>活動</td>";
+      timeSlots.forEach(t => {
+        html += `<td>${shift[t]}</td>`;
+      });
+      html += "</tr></table>";
+      return html;
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
